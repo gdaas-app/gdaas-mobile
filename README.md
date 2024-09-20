@@ -23,6 +23,10 @@ npx knex --knexfile "./dist/database/config/knexfile.js" --migrations-directory 
 npx knex --knexfile "./dist/database/config/knexfile.js" seed:run
 ```
 
+### Logar no container
+Para rodar os comandos acime e logar no container use:
+`docker exec -it gdaas-backend /bin/sh`
+
 Para conectar no banco de dados, utilize as seguintes credenciais:
 
 - Host: 127.0.0.1
