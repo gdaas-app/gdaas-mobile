@@ -1,0 +1,60 @@
+services:
+  postgres-knex:
+    container_name: pg_knex
+    hostname: postgres_knex
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    networks:
+      - gdaas-dev
+    environment:
+      POSTGRES_DB: gdaas
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: senha
+      TZ: America/Sao_Paulo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  redis-service:
+    image: redis:7
+    container_name: redis-service
+    ports:
+      - 6379:6379
+    networks:
+      - gdaas-dev
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: ["redis-server"]
+
+  gdaas-backend:
+    image: ghcr.io/gdaas-app/gdaas-mobile/backend-encrypt:latest
+    container_name: gdaas-backend
+    hostname: gdaas-backend
+    restart: always
+    user: node
+    ports:
+      - 3000:3000
+    networks:
+      - gdaas-dev
+    environment:
+      DATABASE_PORT: 5432
+      DATABASE_NAME: gdaas
+      DATABASE_USER: usuario
+      DATABASE_PASSWORD: senha
+    depends_on:
+      postgres-knex:
+        condition: service_healthy
+      redis-service:
+        condition: service_healthy
+
+networks:
+  gdaas-dev:
+    driver: bridge
